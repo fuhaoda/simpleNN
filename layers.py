@@ -1,7 +1,12 @@
 import numpy as np
 
+
 def sigmoid(x):
-    return 1.0/(1.0+np.exp(-x))
+    return 1.0 / (1.0 + np.exp(-x))
+
+
+def sigmoid_prime(x):
+    return sigmoid(x) * (1 - sigmoid(x))
 
 
 class Layer:
@@ -42,15 +47,68 @@ class Layer:
     def clear_deltas(self):
         pass
 
-    def update_params(self,learning_rate):
+    def update_params(self, learning_rate):
         pass
 
     def describe(self):
         raise NotImplementedError
 
 
+class ActivationLayer(Layer):
+    def __init__(self, input_dim):
+        super().__init__()
+        self.input_dim = input_dim
+        self.output_dim = input_dim
+
+    def forward(self):
+        data = self.get_forward_input()
+        self.output_data = sigmoid(data)
+
+    def backward(self):
+        delta = self.get_backward_input()
+        data = self.get_forward_input()
+        self.output_delta = delta * sigmoid_prime(data) #todo: check the math
 
 
+    def describe(self):
+        print("|--" + self.__class__.__name__)
+        print("|-- dimensions: ({},{}".format(self.input_dim, self.output_dim))
 
 
+class DenseLayer(Layer):
+    def __init__(self, input_dim, output_dim):
+        super().__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
 
+        self.weight = np.random.randn(output_dim, input_dim)
+        self.bias = np.random.randn(output_dim, 1)
+
+        self.params = [self.weight, self.bias]
+
+        self.delta_w = np.zeros(self.weight.shape)
+        self.delta_b = np.zeros(self.bias.shape)
+
+    def forward(self):
+        data = self.get_forward_input()
+        self.output_data = np.dot(self.weight, data) + self.bias
+
+    def backward(self):
+        data = self.get_forward_input()
+        delta = self.get_backward_input()
+
+        self.delta_b += delta #todo: check the math
+        self.delta_w += np.dot(delta, data.transpose())
+        self.output_delta = np.dot(self.weight.transpose(), delta)
+
+    def update_params(self, learning_rate):
+        self.weight -= learning_rate * self.delta_w
+        self.bias -= learning_rate * self.delta_b
+
+    def clear_deltas(self):
+        self.delta_w = np.zeros(self.weight.shape)
+        self.delta_b = np.zeros(self.bias.shape)
+
+    def describe(self):
+        print("|--" + self.__class__.__name__)
+        print("|-- dimensions:({},{})".format(self.input_dim, self.output_dim))
