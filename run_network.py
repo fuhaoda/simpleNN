@@ -3,9 +3,10 @@ import network
 from layers import DenseLayer, ActivationLayer
 
 training_data, test_data = load_mnist.load_data()
-training_data = list(training_data)
+training_data = list(training_data)  # <1>
 test_data = list(test_data)
 
+# unzip the iterator
 
 net = network.SequentialNetwork()
 

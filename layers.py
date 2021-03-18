@@ -98,17 +98,17 @@ class ActivationLayer(Layer):  # <1>
 
 
 class DenseLayer(Layer):
-    def __init__(self, input_dim, output_dim): #<1>
+    def __init__(self, input_dim, output_dim):  # <1>
         super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
 
-        self.weight = np.random.randn(output_dim, input_dim) #<2>
+        self.weight = np.random.randn(output_dim, input_dim)  # <2>
         self.bias = np.random.randn(output_dim, 1)
 
-        self.params = [self.weight, self.bias] #<3>
+        self.params = [self.weight, self.bias]  # <3>
 
-        self.delta_w = np.zeros(self.weight.shape) #<4>
+        self.delta_w = np.zeros(self.weight.shape)  # <4>
         self.delta_b = np.zeros(self.bias.shape)
 
     # <1> Dense layers have input and output dimensions.
@@ -116,21 +116,20 @@ class DenseLayer(Layer):
     # <3> The layer parameters consist of weights and bias terms.
     # <4> Deltas for weights and biases are set to zero.
 
-
     def forward(self):
         data = self.get_forward_input()
-        self.output_data = np.dot(self.weight, data) + self.bias #<1>
+        self.output_data = np.dot(self.weight, data) + self.bias  # <1>
 
     # <1> The forward pass of the dense layer is the affine linear transformation on input data defined by weights and biases.
     # The weight is a matrix with output_dim x input_dim, data is a matrix with input_dim x mini_batch size. Bias is a column vector with output_dim x 1
 
     def backward(self):
         data = self.get_forward_input()
-        delta = self.get_backward_input() # <1>
+        delta = self.get_backward_input()  # <1>
 
         self.delta_b += delta  # <2>
-        self.delta_w += np.dot(delta, data.transpose()) # <3>
-        self.output_delta = np.dot(self.weight.transpose(), delta) # <4>
+        self.delta_w += np.dot(delta, data.transpose())  # <3>
+        self.output_delta = np.dot(self.weight.transpose(), delta)  # <4>
 
     # <1> For the backward pass we first get input data and delta. delta is a p by 1 matrix. We fit each individual case each time.
     # <2> delta_b = delta. The += is calculated for each mini batch. Data are fed in case by case.
@@ -138,16 +137,15 @@ class DenseLayer(Layer):
     # <4> By the relationship delta_i = delta_{i+1} df_{i+1}/df_i, delta_{i+1} has dimension as p_{i+1} by 1, and
     #    df_{i+1}/df_i = W_i which is a p_{i+1} by p_i matrix. The output_delta should be a p_i by n matrix.
 
-
-    def update_params(self, learning_rate): # <1>
+    def update_params(self, learning_rate):  # <1>
         self.weight -= learning_rate * self.delta_w
         self.bias -= learning_rate * self.delta_b
 
-    def clear_deltas(self): # <2>
+    def clear_deltas(self):  # <2>
         self.delta_w = np.zeros(self.weight.shape)
         self.delta_b = np.zeros(self.bias.shape)
 
-    def describe(self): # <3>
+    def describe(self):  # <3>
         print("|--" + self.__class__.__name__)
         print("|-- dimensions:({},{})".format(self.input_dim, self.output_dim))
 
